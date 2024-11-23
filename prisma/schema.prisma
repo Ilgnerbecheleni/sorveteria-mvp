@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Produto {
+  id          Int             @id @default(autoincrement())
+  nome        String
+  preco Decimal  @db.Decimal(10, 2) // Garantir precisão no preço
+  descricao   String?
+  isPorKg     Boolean    @default(false) // Indica se o produto é vendido por Kg
+  criadoEm    DateTime        @default(now())
+  vendaProduto VendaProduto[]
+}
+
+model Venda {
+  id          Int             @id @default(autoincrement())
+  criadoEm    DateTime        @default(now())
+  total       Float           @default(0.0)
+  vendaProduto VendaProduto[]
+}
+
+model VendaProduto {
+ id         Int     @id @default(autoincrement())
+  quantidade Decimal  @db.Decimal(10, 3) // Para suportar valores menores que 1
+  total      Decimal  @db.Decimal(10, 2)
+  produtoId  Int
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  vendaId    Int
+  venda      Venda    @relation(fields: [vendaId], references: [id])
+}
